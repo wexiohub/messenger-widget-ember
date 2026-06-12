@@ -1,0 +1,52 @@
+{
+  "name": "@wexio/messenger-widget-ember",
+  "version": "1.0.23",
+  "description": "Ember integration for the Wexio web messenger. Side-effect registers <wexio-widget> as a custom element so Glimmer templates render it natively.",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "ember-source": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ember-source": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wexiohub/messenger-widget-ember.git"
+  },
+  "homepage": "https://github.com/wexiohub/messenger-widget-ember#readme",
+  "bugs": {
+    "url": "https://github.com/wexiohub/messenger-widget-ember/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "node scripts/prepack.mjs"
+  },
+  "keywords": [
+    "ember-addon",
+    "wexio",
+    "chat",
+    "messenger",
+    "custom-element"
+  ]
+}
