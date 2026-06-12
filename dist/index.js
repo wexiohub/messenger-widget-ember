@@ -1,90 +1,81 @@
 /**
- * `@wexio/messenger-widget-ember` — Ember integration for the Wexio
- * web messenger.
+ * `@wexio/messenger-widget-ember` — ESM entry.
  *
- * Importing this module SIDE-EFFECT registers `<wexio-widget>` as a
- * global custom element. Ember 4+/Glimmer renders unknown HTML tags as
- * native DOM elements, so once the element is registered you can use
- * `<wexio-widget>` directly in any `.hbs` template — no Ember
- * component wrapper required.
+ * Lightweight service helper class for Ember consumers — wraps the
+ * underlying `<wexio-widget>` custom element's imperative API
+ * (identify / prefill / show / hide / shutdown).
  *
- *   // app/routes/application.js (or any module loaded at app boot)
- *   import "@wexio/messenger-widget-ember";
+ * **Loading the widget runtime** — this package intentionally does NOT
+ * side-effect-import `widget.js`. Ember CLI scans installed packages
+ * via synchronous `require()` at boot time, which can't load ESM
+ * modules; a side-effect ESM import here would break every consumer's
+ * `ember serve`. Instead, consumers load the widget runtime via a
+ * `<script>` tag in `app/index.html`:
  *
- *   // app/templates/application.hbs
- *   <wexio-widget
- *     public-key="pk_live_..."
- *     {{on "wexio:resize" this.onResize}}
- *     {{on "wexio:close"  this.onClose}}
- *   ></wexio-widget>
+ *   <script type="module" src="https://cdn.wexio.io/widget/widget.js"></script>
  *
- * For imperative identity / prefill control, the package also exports
- * a `WexioWidgetService` class consumers can register as an Ember
- * service. It wraps the underlying element's `identify()` method and
- * the global `window.Wexio()` helper for prefill / show / hide.
+ * Then use `<wexio-widget>` directly in any `.hbs` template — Glimmer
+ * renders unknown tags as native DOM. The service helper below
+ * provides the imperative entry points for component / route code.
  *
- * The wrapper is intentionally thin — Ember's template engine handles
- * attribute binding + event handlers natively, so a heavyweight
- * addon-style component would add boilerplate without value. If you
- * need richer integration (auto-injection of identity from an
- * `@service session`, lifecycle hooks for engine transitions, etc.)
- * build it on top of this in your app's services layer.
+ * The matching CJS entry (`./index.cjs`) is identical in API; the
+ * package's `exports` map routes `require()` calls there.
  */
-
-import "./widget.js";
 
 /**
- * Optional service helper. Register in your Ember app as:
- *
- *   // app/services/wexio-widget.js
- *   import { WexioWidgetService } from "@wexio/messenger-widget-ember";
- *   export default class extends WexioWidgetService {}
- *
- * Then inject anywhere:
- *
- *   import { service } from "@ember/service";
- *   export default class FooComponent extends Component {
- *     @service wexioWidget;
- *     @action login() {
- *       this.wexioWidget.identify({ jwt: this.session.jwt });
- *     }
- *   }
+ * Runtime-inject the widget bundle on first reference. Idempotent —
+ * subsequent calls bail because the marker script is already in the
+ * DOM. The browser caches the module after first load so subsequent
+ * service instances skip the network request. Calling from the
+ * service constructor + every imperative method ensures the runtime
+ * is loaded by the time any UI actually uses the widget.
  */
+function ensureRuntime() {
+  if (typeof document === "undefined") return;
+  if (typeof customElements !== "undefined" && customElements.get("wexio-widget")) return;
+  if (document.querySelector("script[data-wexio-widget-runtime]")) return;
+  const script = document.createElement("script");
+  script.type = "module";
+  script.src = "https://cdn.wexio.io/widget/widget.js";
+  script.setAttribute("data-wexio-widget-runtime", "");
+  script.async = true;
+  document.head.appendChild(script);
+}
+
 export class WexioWidgetService {
-  /** Returns the first `<wexio-widget>` element in the document, or
-   *  `null` if none mounted. */
+  constructor() {
+    ensureRuntime();
+  }
+
   get element() {
     if (typeof document === "undefined") return null;
     return document.querySelector("wexio-widget");
   }
 
-  /** Log a known user in. Pass `null` to log out. */
   identify(user) {
-    this.element?.identify?.(user ?? null);
+    const el = this.element;
+    if (el && typeof el.identify === "function") {
+      el.identify(user ?? null);
+    }
   }
 
-  /** Update unverified prechat prefill values via the global
-   *  `window.Wexio()` API. No-op when no widget is mounted. */
   prefill(values) {
     if (typeof window === "undefined") return;
-    window.Wexio?.("prefill", values);
+    if (typeof window.Wexio === "function") window.Wexio("prefill", values);
   }
 
-  /** Show the widget panel. */
   show() {
     if (typeof window === "undefined") return;
-    window.Wexio?.("show");
+    if (typeof window.Wexio === "function") window.Wexio("show");
   }
 
-  /** Hide the widget panel. */
   hide() {
     if (typeof window === "undefined") return;
-    window.Wexio?.("hide");
+    if (typeof window.Wexio === "function") window.Wexio("hide");
   }
 
-  /** Clear identity (log out). */
   shutdown() {
     if (typeof window === "undefined") return;
-    window.Wexio?.("shutdown");
+    if (typeof window.Wexio === "function") window.Wexio("shutdown");
   }
 }
