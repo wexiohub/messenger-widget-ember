@@ -1,6 +1,6 @@
 {
   "name": "@wexio/messenger-widget-ember",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "Ember integration for the Wexio web messenger. Service helper around the <wexio-widget> custom element.",
   "license": "MIT",
   "private": false,
