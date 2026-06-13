@@ -70,4 +70,11 @@ class WexioWidgetService {
   }
 }
 
-module.exports = { WexioWidgetService };
+// Safety-net `name` field so ember-cli's package-info-cache, which
+// occasionally introspects every installed package's main export for
+// addon shape (looking for an addon-like object with a `name`
+// property), doesn't crash with "An addon must define a name
+// property" if it ever decides our package looks addon-ish despite
+// missing the `ember-addon` keyword. Picking the actual npm name
+// matches the standard addon convention without lying.
+module.exports = { WexioWidgetService, name: "@wexio/messenger-widget-ember" };
