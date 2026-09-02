@@ -1,5 +1,11 @@
 # @wexio/messenger-widget-ember
 
+## 1.2.2
+
+### Patch Changes
+
+- 948dbaf: Fix website page-view tracking reporting the PREVIOUS page's title after a SPA navigation. The host router changes the URL synchronously but updates `document.title` a tick later, so the title was read too early. Both capture paths (the iframe `loader.js` and the web-component provider) now wait for `<title>` to actually update (via a `MutationObserver`, with a short timeout fallback) before reporting, so the title matches the new URL.
+
 ## 1.2.1
 
 ### Patch Changes
