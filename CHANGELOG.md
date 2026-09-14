@@ -1,5 +1,23 @@
 # @wexio/messenger-widget-ember
 
+## 1.2.4
+
+### Patch Changes
+
+- 4215287: Re-publish to complete the release across all distribution channels (npm, the per-package dist repos, GitHub Releases, and the CDN bundle) after the 1.2.3 publish only partially completed. No functional changes from 1.2.3.
+
+## 1.2.3
+
+### Patch Changes
+
+- 146aa5f: Make notification sounds far lighter, two changes:
+
+  1. **Lazy loading.** The inbound/outbound `Audio` elements were built with `preload="auto"`, so both sound files were fetched on every page load the widget was embedded on, even for visitors who never opened the chat. They now use `preload="none"` (with `src` set after `preload`), so a sound downloads lazily on its first `play()`, which is always user-gesture triggered.
+
+  2. **MP3 instead of WAV.** The 21 preset sounds were uncompressed WAV (~17MB total, individual files up to ~1.7MB). They are now 128kbps MP3 (~2MB total, ~16-52KB each). Preset ids resolve to `/sounds/wx-nt_*.mp3`; operator-uploaded custom sounds (full URLs) are unaffected.
+
+  Together this removes ~3.6MB from the host page's initial load and makes the lazy first-play near-instant. No API or behavior change.
+
 ## 1.2.2
 
 ### Patch Changes
