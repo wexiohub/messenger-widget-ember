@@ -1,5 +1,15 @@
 # @wexio/messenger-widget-ember
 
+## 1.3.1
+
+### Patch Changes
+
+- 231e345: Fix the widget when it runs embedded inside a host app (the dashboard's live preview / the React-component embed).
+
+  - **Demo content no longer breaks the host page.** In demo/preview mode the mock threads, help articles and news are now read straight from the widget's bundled demo content instead of next-intl's lazy `demo` namespace. Inside an embedded host (Turbopack) that lazy namespace was not visible to the demo builders, so previews rendered empty and logged `MISSING_MESSAGE` for every key, and the thread-list builder crashed the whole host page with "map is not a function". The builders are also guarded so a not-yet-resolved value degrades to empty instead of throwing.
+  - **Pickers and menus are clickable inside the Shadow DOM embed.** The GIF and emoji pickers, the conversation-header overflow menu, the language selector and the composer commands popover used a document-level click-outside check against `event.target`. In the Shadow DOM embed that target is retargeted to the shadow host, so every in-picker click read as "outside" and closed the popover on mousedown before the click landed (a GIF/sticker/emoji tap "fell through"). They now test `event.composedPath()`, which pierces the shadow boundary and is unchanged for the iframe / standalone embeds.
+  - **team-status "online" dot alignment.** The status dot is now aligned to the title's first line instead of drifting above it when operator avatars make the row taller.
+
 ## 1.3.0
 
 ### Minor Changes
