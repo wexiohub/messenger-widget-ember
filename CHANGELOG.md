@@ -1,5 +1,55 @@
 # @wexio/messenger-widget-ember
 
+## 1.3.0
+
+### Minor Changes
+
+- 037c210: Full two-way messaging: multi-topic threads, offline outbox, blocked visitors, richer composer, and transcript download.
+
+  **Multi-topic conversation threads**
+
+  - A multi-topic conversation list: the visitor can keep several topics side by side, each with its own preview, unread count, and status (open / pending / resolved). Starting a new question opens a fresh thread instead of overwriting the current one.
+  - The launcher badge, peek, thread list, and open thread now share one unread source, so reading a message clears it everywhere at once. Quick-reply chips render inside the launcher peek so a visitor can answer without opening the panel.
+  - Per-thread realtime: typing, unread, operator-handoff and status changes update the right thread live.
+
+  **Blocked visitors**
+
+  - Two levels of blocking are now honored on the client. **Thread-level**: the visitor can't reply in that thread but can still start a new one. **Global (contact-level)**: no composer anywhere and no new conversations, with friendly copy. The block is enforced on first paint (so a blocked visitor never sees a live composer) and kept current via the realtime stream. Blocked sends are dropped from the offline queue instead of retrying forever.
+
+  **Offline outbox**
+
+  - A generic IndexedDB queue backs the visitor's outbound actions — message sends, reactions, read receipts, profile changes, and activity tracking. Actions taken offline (or mid-reconnect) are persisted and converge automatically when the connection returns, so nothing is silently lost.
+
+  **Composer**
+
+  - Rich-text editing (bold / lists / links, Markdown-aware) and a GIF / sticker picker join the existing emoji picker, file attachments, and voice recorder.
+
+  **Conversation lifecycle**
+
+  - Download a conversation transcript from the header.
+  - A clearer "conversation closed" state with a one-tap "start a new conversation".
+  - A connection-status footer replaces the old branding footer, so a dropped connection is visible in-thread.
+
+  **Reliability**
+
+  - A code-split chunk that can't be fetched (for example the voice-note player while offline) now degrades gracefully to a fallback instead of breaking the whole conversation.
+
+  **Captured visitors (lazy inbox)**
+
+  - A drive-by visitor no longer opens a conversation until they actually engage. When there is nothing in the inbox yet, a configured welcome message shows as a default thread the visitor can read and reply in, rather than an empty "no conversations" screen — and the proactive welcome peek + badge appear once, then clear after it is read.
+  - A first message (or an operator's proactive message) creates the conversation on the fly and its reply, greeting, and typing now render live in-thread — no reload, and no double launcher peek when a greeting flow is active.
+  - Sent-message stability: the visitor's own bubble no longer flickers (animate out then back in) when the thread refetches after a send, and switching a thread's conversation id no longer remounts the open thread.
+
+  **Media message previews**
+
+  - A thread whose last message is a photo, video, gif, sticker, voice note, audio, or file now shows a typed label + thumbnail in the thread list and launcher peek, instead of a blank row.
+
+  **i18n**
+
+  - New conversation, thread, block, and transcript strings across all supported UI locales.
+
+  No breaking changes to the package API — `publicKey`, `user`, `config`, and the `onOpen` / `onClose` / `onResize` callbacks are unchanged.
+
 ## 1.2.4
 
 ### Patch Changes

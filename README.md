@@ -9,8 +9,22 @@ Ember integration for the [Wexio](https://wexio.io) web messenger. Registers the
 🏠 [Website](https://wexio.io)
 📚 [Developer Docs](https://learn.wexio.io/docs/web-widget)
 
+## Features
+
+The messenger is a full two-way support surface, not just a contact form:
+
+- **Conversations & threads** — real-time chat with history, read receipts and delivery states, plus multi-topic threads so a visitor can keep several questions side by side.
+- **Rich messages** — images and galleries (with a lightbox), GIFs, inline video, voice notes, and file / PDF attachments; AI replies cite their sources.
+- **Composer** — rich-text editing, emoji and GIF pickers, file attachments, and an in-widget voice recorder.
+- **Home, Help & News** — a configurable Home tab (team status, quick actions, help search, news), a searchable help center, and a news feed — all driven by the operator's dashboard.
+- **Identity** — anonymous by default, or log a known visitor in with a Google, JWT, or HMAC proof.
+- **Resilient & offline-aware** — an offline outbox queues sends, reactions, read-acks and profile changes and converges on reconnect; a dropped connection is shown in-thread.
+- **Themed & localized** — follows the operator's brand theme (light / dark) and ships 33 UI locales; visitors can switch language in-widget.
+- **Demo mode** — omit the public key to render a self-contained preview with bundled mock content (great for landing pages and Storybook).
+
 ## 📂 Description
 
+- [Features](#features)
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Event handling](#event-handling)
