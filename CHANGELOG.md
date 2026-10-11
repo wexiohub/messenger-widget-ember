@@ -1,5 +1,28 @@
 # @wexio/messenger-widget-ember
 
+## 1.4.0
+
+### Minor Changes
+
+- 784e291: Same host controls on every embed (React, web-component, script-tag/iframe), plus a batch of embed fixes.
+
+  **New**
+
+  - **Theme control.** `theme` prop (React) / `theme="light|dark|auto"` attribute (web-component) / `window.Wexio('theme', ...)` and `wexioSettings.theme` (script tag). A host dark-mode toggle can drive the widget at runtime; it wins over the OS and the operator default.
+  - **Launcher offset.** `offset={{ x, y }}` (React) / `offset-x`, `offset-y` attributes (web-component) / `wexioSettings.offset` (script tag) nudge the launcher, peek and panel away from their corner so they clear host furniture (cookie banners, back-to-top). Panel size caps subtract the same offset, so a pushed-up panel never overflows the top of the viewport.
+  - **Branding override everywhere.** `configOverride` is honoured by all three embeds (React prop, `wexioSettings.configOverride`, and `wexio:config-override:v1` messages for live changes).
+  - **Events and identity parity.** The web-component now fires `wexio:open` and reads `wexioSettings.user`; the script-tag embed re-emits `wexio:open` / `wexio:close` / `wexio:resize` as `window` events and accepts `wexioSettings.mode`.
+  - **Launcher position in the iframe.** The operator's left/right launcher corner now moves the frame accordingly.
+
+  **Fixed**
+
+  - **Widget crashed on every site ("This page couldn't load").** The iframe route got a fresh default env on every render, so any config error (403/404) looped effects forever. The env is now stable.
+  - **iframe app returned 500 for most locales** (`en-GB`, `de`, `fr`, ...): the server imported a `demo.<locale>.json` that only exists for `en` and `uk`. It now falls back to English.
+  - **Web-component ignored theme colours.** Theme tokens were injected into the page `<head>`, which cannot reach the widget's Shadow DOM; they are now adopted into the shadow root, like the React embed.
+  - **iframe sizing and position.** The panel was a smaller copy (~338x558 instead of 420x670) and sat 20px further from the corner than the other embeds; it now matches. The closed launcher frame fits the unread badge, shadow and peek bubble instead of clipping them, the panel no longer slowly rises from the bottom when opening, and a crashed widget stays a small corner box instead of covering the page.
+  - **Conversation-header menu closed while typing.** The header was remounted on every shell re-render.
+  - **Demo mode.** The FAQ tab no longer crashes on search before the demo content loads, and the demo conversation's quick-reply buttons and attachment names are no longer blank.
+
 ## 1.3.1
 
 ### Patch Changes
