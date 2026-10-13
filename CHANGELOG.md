@@ -1,5 +1,13 @@
 # @wexio/messenger-widget-ember
 
+## 1.4.1
+
+### Patch Changes
+
+- 9383463: Fix the widget still rendering on a site after the operator disabled it.
+
+  When an integration is `disabled` (operator kill switch) or `plan_blocked` (org below the required plan), the backend correctly answers `status: 'disabled' | 'plan_blocked'`, and the contract is that the launcher hides silently. Only the script-tag loader honoured that (it checks the status before creating its iframe). The React and web-component embeds mount the widget shell directly and never looked at `status`, so they painted a live launcher whose session the backend then refused, and the widget opened straight into an error. The shell now renders nothing for any status other than `active`, so all embeds behave the same. `status` is server-owned (never taken from host props) and falls back to `active` if the gate request fails, so an outage cannot hide a working widget.
+
 ## 1.4.0
 
 ### Minor Changes
