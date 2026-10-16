@@ -8,6 +8,7 @@ Ember integration for the [Wexio](https://wexio.io) web messenger. Registers the
 
 🏠 [Website](https://wexio.io)
 📚 [Developer Docs](https://learn.wexio.io/docs/web-widget)
+🎮 [Playground](https://cdn.wexio.io/playground)
 
 ## Features
 

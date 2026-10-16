@@ -1,5 +1,123 @@
 # @wexio/messenger-widget-ember
 
+## 1.5.0
+
+### Minor Changes
+
+- cb1f56b: The operator's `defaultTab` (Home, Messenger, Help, News, Profile) is now applied. The panel used to open on Home for every integration because the landing tab was fixed on the first render, before the config arrived. It now opens on the tab set in the dashboard (a disabled tab still falls back to the first enabled one); a tab the visitor already picked, a deep link, a host `openTab` or a peek action is never overridden. Integrations with a non-Home default tab will see their panel open there. Same in the React, web-component and script-tag embeds.
+- cb1f56b: The widget now fails closed (behaviour change, hence minor).
+
+  - A definitive "off" answer from the BE (HTTP 400 / 401 / 403 / 404 on the config, a status other than `active`, or a 403 `webMessengerNotAvailable` / `webMessengerDisabled` on the handshake or a content query) renders nothing in the React, web-component and script-tag embeds, stops the visitor handshake, realtime, tracking and the outbox, and evicts that key's cached config so a later outage cannot bring it back. In the script-tag embed the frame and the attribution link are removed.
+  - A transient failure (network, timeout, 5xx) hides the widget unless an earlier `active` answer is cached, in which case it still loads from the cache.
+  - With an injected `config` plus a public key, a failed gate fetch used to default to `active` (fail open); it now follows the same policy.
+  - Config and gate requests time out after 8 seconds.
+  - Unchanged: no public key / demo mode, injected config without a key, and previews that force dummy data.
+
+  See "Failure policy" in `docs/CONFIG_REFERENCE.md`.
+
+- cb1f56b: Web fonts: the list of families the widget will load grows from 10 to 26 (Open Sans, Noto Sans, Source Sans 3, Manrope, Onest, PT Sans, Fira Sans, Jost, Rubik, Comfortaa, Merriweather, Lora, PT Serif, Playfair Display, JetBrains Mono, IBM Plex Mono added). A theme `fontFamily` that starts with a listed family adds one stylesheet link to Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) on the visitor's page, including for a self-hosted copy of the same name: a third-party request (IP disclosed to Google) that a strict CSP (`style-src` / `font-src`) can block, in which case the stack's fallback font is shown. See THEMING.md. Also: `fontFamily` is now validated (the backend's rule) before it is written into CSS, so an unsafe value is ignored and the default font stack applies.
+- cb1f56b: Smaller first download (PF-03). Only the resolved language is fetched (one on-demand chunk per locale; English is bundled and renders first, the language swaps in when its chunk arrives, so a slow or failed request never hides the launcher and never shows message keys). The phone validator (libphonenumber) loads on demand when the Profile tab opens. The JS output is whitespace-minified.
+
+  **Layout change of the published bundle (migration note).** The script/web-component `widget.js` is no longer a single file: it imports hash-named siblings `widget-wc-<hash>.js` relative to its own URL. They must be served from the same directory as `widget.js`. `cdn.wexio.io/widget/` and the pinned `cdn.wexio.io/widget/v<version>/` folders do this; the legacy `widget@<version>.js` URL is now a permanent redirect to `widget/v<version>/widget.js` (so chunks resolve in the pinned folder). Self-hosters must copy the whole `public/widget/` folder: copying `widget.js` alone fails to load. A missing lazy chunk degrades gracefully (English, no emoji picker) and logs a `[wexio]` console warning. The React package already shipped `widget-react-<hash>.js` chunks; they now also include one chunk per locale. The latest `widget.js` / `widget-react.js` entries are cached for 60 s without stale-while-revalidate so a cached entry cannot outlive its chunks. Public bundles also ship `LICENSES.txt` with third-party notices.
+
+- cb1f56b: Performance round 2.
+
+  - A feature whose code chunk fails to load (emoji picker, GIF picker, voice recorder, voice waveform, article views) now retries automatically, then shows a small inline "Couldn't load - Retry" instead of staying broken until the page is reloaded. A language chunk that fails keeps English and retries quietly. (In the script-tag / iframe embed the frame's runtime remembers a failed chunk, so Retry only helps in the React and web-component embeds there.)
+  - Voice notes follow iOS Safari's audio rules: nothing is decoded or played before the visitor taps, hovering only warms the code, a note whose waveform cannot be built falls back to the browser's own player (or an "Open audio" link), and only one note plays at a time.
+  - The closed launcher in the iframe embed no longer re-measures itself on every thread event that changes nothing.
+
+### Patch Changes
+
+- cb1f56b: Conversation review fixes.
+
+  - Loading older history no longer pulls a reader who scrolled up to the bottom when the newest message is their own; only a real send of their own scrolls to the new bubble.
+  - `Wexio('shutdown')` now also forgets unsent drafts and the offline queue of unsent messages, so the next visitor on a shared device never sees or sends the previous visitor's text. Drafts are scoped per integration.
+  - An edit of a message older than the loaded history no longer appears as a new message at the bottom; it applies once that message loads. An edit that blanks a message keeps the previous text.
+  - Closing the panel discards an unsent voice recording (it is not saved or sent).
+
+- cb1f56b: Conversation fixes from the UI audit.
+
+  - A message queued (for example offline) in one thread no longer shows up inside another thread.
+  - Long unbroken text, long links and wide HTML tables stay inside the message bubble (tables scroll inside it).
+  - The visitor's own send scrolls to the new bubble even when they had scrolled up, and resizing the panel (window, rotation, keyboard) keeps the newest message in view.
+  - Closing the panel stops a voice recording and releases the microphone.
+  - Realtime events with nothing to show (location, reaction, unknown kinds) are no longer messages (no blank bubble, chime or notification), and edited messages (`messageUpdate`) now update in place.
+  - An unsent draft is kept per thread when the visitor leaves and re-enters it.
+  - Demo: the sent exchange survives re-entering the thread, an attachment-only send shows the attachment, and the voice-note reply is localised (en, uk).
+
+- cb1f56b: Home, Help and News audit fixes.
+
+  - A partial or malformed news / help reply (null list, missing `items` / `meta`) no longer crashes the widget; the news unread check that runs in the shell took the launcher down with it.
+  - A visitor session whose handshake reply lacks a usable `expiresIn` no longer starts an endless immediate re-handshake loop (renewal is clamped and backs off; very long lifetimes no longer overflow the timer).
+  - A failed "next page" request in News / Help no longer raises an unhandled error; scrolling again retries.
+  - Long unbroken text (URLs, tokens) in news cards, help rows and article titles, tags and prose wraps inside the panel instead of being clipped.
+  - RTL: Home / Help / News content now follows the panel direction (it was forced left-to-right), directional arrows and chevrons mirror, cards align to the start edge, and the Arabic team-status copy is translated.
+  - Accessibility: the Home card "see all" button has an accessible name; opening an article by keyboard keeps focus in the panel.
+  - Quick-action `open-url` only opens http(s), mailto, tel and sms links; a malformed home layout (no buttons, null block) no longer breaks the Home tab.
+  - Demo mode: lists show a skeleton while the demo content loads (no blank cards), and a failed demo chunk load no longer raises an unhandled error.
+
+- cb1f56b: Launcher and open/close fixes across the three embeds (React, web-component, script tag).
+
+  - Script tag: closing the panel with the header X no longer hides the whole frame. The launcher used to disappear until the host called `Wexio('show')`; now it stays and the frame shrinks to the launcher.
+  - Script tag: the open panel's drop shadow is no longer cut off in a hard edge at the frame's left and top; the frame leaves room for it. Closing no longer clips the panel while it fades out (the frame waits for the fade), and the auth-error popup ("Couldn't connect") is no longer clipped by the small closed frame.
+  - Web-component and React: Tailwind shadows, rings and `--tw-*` utilities work again inside the Shadow DOM (an unlayered defaults block was resetting them), so the launcher has its drop shadow and keyboard focus ring. Host page text styles (`letter-spacing`, `text-transform`, `font-style`, `text-align`, `word-break`, `hyphens`, `visibility`, `pointer-events`, `cursor`, ...) no longer leak into the widget. A root font size on the host `<html>` (for example `62.5%`) still scales the web-component and React widget (documented; the script tag is unaffected).
+  - The launcher peek keeps its dismiss X reachable with many quick replies or on a short screen: in the web-component and React embeds it is capped to the viewport, in the script tag the frame grows to fit it and, when the host page clamps the frame, the peek is capped to what remains. The message text keeps priority; the quick replies scroll.
+  - Keyboard: opening from the launcher moves focus into the panel, closing returns it to the launcher, and Escape closes the panel. Escape that cancels an IME composition or the link field does not close the panel.
+  - **Behaviour change (kept on purpose):** `onClose` / `wexio:close` now fire whenever the panel closes (header X, launcher button, Escape), not only for the header X, and `onOpen` / `wexio:open` fire on every open. The script-tag embed now emits `wexio:open` / `wexio:close` window events as documented. **Migration:** a host that unmounts the widget in `onClose` will now remove the launcher on every close; use CSS or state that keeps the component mounted, or ignore the callback.
+  - Script tag: the `wexio:resize` sizes grew (the open frame is 96 px wider and 144 px taller than the panel to hold its margins and shadow, 516 x 814 for a default 420 x 670 panel); consumers sizing a container from them see new numbers.
+  - Arabic and Hebrew set the document direction from the widget locale in every embed (the iframe never did; the web-component only followed the host page). Other locales keep inheriting the host page's direction in the web-component and React. This is the base direction only: full right to left layout polish (physical margins, paddings and alignments) is not part of this release; the Home tab card buttons now align with the direction.
+  - `prefers-reduced-motion` is honoured: the panel slide, launcher morph, badge pulse and peek pop-in no longer play, and looping CSS animations (typing dots, pulse) stop. Opacity fades, the loading spinner (slowly) and width/height springs still animate.
+  - **Visible change:** on a clean host page the web-component and React widget now renders in `system-ui` instead of inheriting the host page font (the iframe/script tag embed is unchanged). The operator theme font (`--wx-font`) still wins. Host `-webkit-text-fill-color` no longer recolours the widget text.
+  - Escape closes the emoji picker and then the panel in the web-component and React embeds (focus used to fall to the page body after the picker closed), and focus returns to the emoji button.
+
+- cb1f56b: Performance fixes for long conversations.
+
+  - Typing in the composer, the operator's typing indicator and an incoming message no longer re-render every message in the thread. On a 500-message thread with a 4x slower CPU, typing 35 characters was 37 long tasks (about 3 s of blocked main thread) and is now none; an incoming message costs less than half of what it did.
+  - The history is mapped once per fetch instead of once per incoming message, and the tracking context no longer hands every message bubble a new value on each update (which made memoisation useless). An inbound message that arrives while the panel is closed no longer re-renders the hidden thread: six messages on a 500-message thread went from about 1-1.6 s of long tasks to 0.2-0.4 s at 4x CPU.
+  - Message bubbles no longer use framer-motion `layout="position"`, so a bubble is not re-measured on every update. Nothing visible changes: new bubbles still slide in, the unread divider still collapses.
+  - Voice notes no longer block the main thread when a conversation opens. They used to start decoding the audio as soon as they appeared, one stall of 200-470 ms for a thread with voice notes; now each is a light static row (play button, stand-in waveform) until the visitor hovers, focuses or presses play, and then plays as before.
+  - A tab that fails to render (for example a malformed payload from the server) no longer blanks the whole widget. The tab shows one calm "Something went wrong" state with a "Try again" button, the launcher and the tab bar keep working, and the failure is reported once through `console.error` with a `[wexio]` prefix. New translation keys `tabError.title`, `tabError.hint`, `tabError.retry` in all 33 locales.
+
+- cb1f56b: Security hardening of the embeds.
+
+  - A host config patch (`wexioSettings.configOverride`, the React `configOverride` prop, `wexio:config-override:v1` messages) can no longer change `status`, `branding` or the BE-owned parts of `security` in production: the "Powered by" badge, the plan gate and the sign-in gate come from the server only. Theme, features, greeting and the other presentation fields are unaffected. In a public build the patch is filtered whenever a real public key is present, on every channel, whatever `mode` the host sets, and also when the patch was posted before the key was set (the filter runs when the config is read). Key-less demo content and the private dashboard build apply the full patch.
+  - The widget now accepts `wexio:*` messages (identify, prefill, shutdown, config override, theme, host navigation) only from its own parent window (iframe) or its own window (web-component, React). A page that frames or opens the customer site can no longer bind the visitor to its identity, wipe the session or restyle the widget.
+  - Script tag: the widget iframe is no longer delegated clipboard read or write access (`allow="autoplay; microphone"`); the widget never used either.
+  - Script tag: operator or RSS article HTML can no longer make the closed iframe cover the host page. The launcher, peek and popup are found by element identity instead of a `data-wx-*` attribute lookup, and `data-wx-*` attributes are dropped from rendered content.
+  - The trusted-host flag is a build-time constant of the private build only; the release boundary check fails if a public bundle carries it.
+  - Escape at the page body no longer closes the open panel while a host modal (`<dialog open>`, `aria-modal`) is open.
+
+- cb1f56b: Threads, sign-in and profile fixes.
+
+  - `Wexio('shutdown')` now also forgets the previous visitor's thread list, unread badge, open conversation and profile form; the next visitor starts from an empty widget.
+  - The thread list catches up after a dropped connection, the network coming back or the tab becoming visible again, and an older or replayed update no longer overwrites a newer preview (or chimes again).
+  - Profile: text typed while a save is in flight is kept; an offline or demo save keeps the new value; a change the server rejects rolls back with a message; the form shows the widget's own validation messages instead of the browser's bubble.
+  - Sign-in: "Try again" works after a blocked Turnstile script and brings the error popup back if it fails again; the Google button shows a busy state and a clear message when Google's script cannot load.
+  - Pressing Enter repeatedly while a required pre-chat form submits sends the message once.
+  - The "You:" prefix in the conversation list is translated (English and Ukrainian; other languages show the English text for now).
+  - Web component: a language picked in Profile switches the widget at once.
+  - Two widgets with different public keys on one page each use their own key, session and drafts.
+  - Wide tables in messages scroll inside the bubble and keep their words whole.
+  - Behaviour note: `setWexioPublicKey`, `setPublicKey` and `getApolloClient` only act on the default instance (the iframe route and non-component code). They no longer affect a `<WexioWidget>` or `<wexio-widget>`, which each own their connection state and take the key from the `publicKey` prop / `public-key` attribute.
+  - A language the server rejects in Profile is rolled back in the widget chrome too, not only in the form.
+
+- cb1f56b: The offline cache (config, gate and the other offline slices) now lives 72 hours instead of 14 days, so a downgraded or disabled key does not keep the widget alive from the cache for weeks during an API outage. Expired entries are treated as absent and evicted.
+- cb1f56b: Changing the public key at runtime (`<WexioWidget publicKey>` prop, the `public-key` attribute) now starts a fresh widget session: the instance (token, Apollo cache, 401 recovery) and the widget tree are rebuilt, so nothing of the previous integration's visitor reaches the new one. An integration whose Home was never customised (the BE sends `homeLayout: []`) now shows the default Home blocks instead of a blank tab.
+
+  Key policy: a key change while the panel is open now reports `onClose` / `wexio:close` for the old widget (the same applies when the host unmounts an open widget); an empty key then the real key is a normal first mount; a key that goes empty and returns within 400 ms keeps the widget and its open chat; empty for longer shows the demo.
+
+  `homeLayout: []` from the BE is deliberately treated as "never customised": the widget shows the bundled default Home blocks (the BE returns `[]` where its entity default is `null` and cannot tell never-customised from emptied, and a Home with no blocks is meaningless). A Home cannot be deliberately emptied.
+
+- cb1f56b: Demo mode: the related news and help-article lists are derived from the demo data and their toggles work. Real widgets are unchanged.
+- cb1f56b: The conversation stays on the newest message when its content grows late: a video tile now reserves its box before the poster or first frame arrives (it was 0px tall, then grew by ~165px), and a reader pinned to the bottom keeps following content that settles at any time, not only for 2 s after the thread opened.
+- cb1f56b: Fix the launcher's double focus ring and the cut-off shadow under the peek quick-reply chips.
+
+  After a click the launcher stayed focused, and the next key press anywhere (an arrow or space scrolling the host page) made the browser show its keyboard ring, so a dark double ring popped onto the button out of nowhere. Focus that came from a pointer no longer draws the ring; keyboard focus still does. The quick-reply chip list also clipped each chip's drop shadow in a hard straight edge; its clip box now contains the shadow.
+
+- cb1f56b: Expanding and collapsing the panel no longer animates its width and height every frame (a full layout of the thread per frame, which stuttered on phone-class CPUs with a long conversation). The panel now snaps to its final size and a compositor-only transform plays the same spring on top, so it looks the same but costs a handful of layouts instead of about 40. The content is never stretched, the iframe embed behaves the same, and `prefers-reduced-motion` snaps straight to the new size.
+- cb1f56b: Docs: every package README links the new Playground (https://cdn.wexio.io/playground), which replaces the StackBlitz / CodeSandbox demos; the examples repository README points there too.
+- cb1f56b: UI polish: messages and the opening conversation rise in like llm-console (gentle-in, last rows staggered, reduced motion = none); the unread badge only fades; the launcher no longer swaps its icon for a spinner while connecting; the demo conversation opens at the newest message.
+
 ## 1.4.1
 
 ### Patch Changes
