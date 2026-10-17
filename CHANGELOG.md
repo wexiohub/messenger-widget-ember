@@ -1,5 +1,12 @@
 # @wexio/messenger-widget-ember
 
+## 1.5.2
+
+### Patch Changes
+
+- 27bb610: Related articles keep their own title in the header and Back returns to where the chain started
+- 27bb610: Restore the smooth expand / collapse animation of the open panel (the header "Expand widget" button), which regressed in 1.5.0: the panel grows and shrinks with one spring on width and height again, and in the iframe embed a collapse is no longer clipped by the frame shrinking before the animation ends.
+
 ## 1.5.1
 
 ### Patch Changes
