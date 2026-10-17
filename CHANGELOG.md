@@ -1,5 +1,16 @@
 # @wexio/messenger-widget-ember
 
+## 1.5.1
+
+### Patch Changes
+
+- 4773a1e: Translations and demo content:
+
+  - 57 widget strings that were still English in 29 locales are now translated (composer formatting, GIPHY picker, offline banner, conversation list empty and error states, "usually replies in…" lines, transcript export).
+  - The emoji picker category names, desktop notification titles ("New message", "Image", "Video", "Voice message", "Attachment"), the profile select placeholders and the file attachment fallback follow the visitor's language.
+  - The demo conversation is available in all 33 locales (it was English and Ukrainian only), the demo article language switcher offers all of them, and the demo messenger shows the integrations clip as a looping, muted GIF-style video below the PDF.
+  - The demo copy no longer reaches the iframe route of live widgets (it is merged only for demo renders), which makes the iframe response smaller.
+
 ## 1.5.0
 
 ### Minor Changes
