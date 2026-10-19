@@ -1,5 +1,11 @@
 # @wexio/messenger-widget-ember
 
+## 1.5.3
+
+### Patch Changes
+
+- 3816144: Keep the bundler-ignore comments in the published bundles so Next/Turbopack consumers build
+
 ## 1.5.2
 
 ### Patch Changes
