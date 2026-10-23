@@ -161,6 +161,10 @@ Service API:
 | `show()`                        | Show the widget panel.                                                |
 | `hide()`                        | Hide the widget panel.                                                |
 | `shutdown()`                    | Clear identity (log out).                                             |
+| `open()` / `close()`            | Open / close the panel (sets the element's `open` attribute; falls back to `window.Wexio('open' \| 'close')`). |
+| `navigate({ tab, article? })`   | Go to a tab / help article / news post without a remount; opens the panel (sets the element's `previewTab`). |
+
+In a template you can also set `default-open="true"` and `open="true"` / `open="false"` (strings; a boolean `false` would remove the attribute and leave the widget uncontrolled) on `<wexio-widget>`.
 
 ## Types
 

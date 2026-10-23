@@ -1,5 +1,11 @@
 # @wexio/messenger-widget-ember
 
+## 1.6.0
+
+### Minor Changes
+
+- cdbf505: Open-state and navigation props on every embed: `defaultOpen`, controlled `open` and `previewTab` (React props, web-component `default-open` / `open` attributes and `previewTab` property, Vue / Angular / Ember wrappers, and `Wexio('open' | 'close' | 'navigate')` + `wexioSettings.defaultOpen` for the script tag). New integration-level `theme.launcherOffset` (px, clamped 0..200) moves the launcher, peek and panel in all three embeds; a host offset wins. Fixes: a persisted `sending` outbox op is retried after a reload, and Enter that confirms an IME candidate no longer sends the message.
+
 ## 1.5.3
 
 ### Patch Changes

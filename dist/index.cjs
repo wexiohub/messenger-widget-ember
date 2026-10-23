@@ -32,6 +32,9 @@ function ensureRuntime() {
   document.head.appendChild(script);
 }
 
+/** Monotonic nonce so every `navigate()` is a new request. */
+let navNonce = 0;
+
 class WexioWidgetService {
   constructor() {
     ensureRuntime();
@@ -67,6 +70,50 @@ class WexioWidgetService {
   shutdown() {
     if (typeof window === "undefined") return;
     if (typeof window.Wexio === "function") window.Wexio("shutdown");
+  }
+
+  /** Open the panel (the widget element's controlled `open`, else the loader command). */
+  open() {
+    this._setOpen(true);
+  }
+
+  /** Close the panel. */
+  close() {
+    this._setOpen(false);
+  }
+
+  /**
+   * Navigate to a tab (and optionally a help article / news post) without a remount; opens the
+   * panel. `{ tab, article? }`; every call is a new request.
+   */
+  navigate(target) {
+    const el = this.element;
+    if (el) {
+      navNonce += 1;
+      el.previewTab = { ...target, nonce: navNonce };
+    } else if (typeof window !== "undefined" && typeof window.Wexio === "function") {
+      window.Wexio("navigate", target);
+    }
+  }
+
+  _setOpen(open) {
+    const el = this.element;
+    if (el) {
+      const want = open ? "true" : "false";
+      // Idempotent: already in the wanted state (read from the rendered panel) -> nothing to do.
+      const panel = el.shadowRoot && el.shadowRoot.querySelector("[data-wx-panel]");
+      if (panel && !panel.hasAttribute("inert") === open) return;
+      // The widget reacts to the attribute CHANGING. It already says `want` but the panel is not
+      // there (the visitor toggled it since): flip it away first so this call is a transition again.
+      if (el.getAttribute("open") === want) {
+        el.setAttribute("open", open ? "false" : "true");
+        setTimeout(() => el.setAttribute("open", want), 0);
+      } else {
+        el.setAttribute("open", want);
+      }
+    } else if (typeof window !== "undefined" && typeof window.Wexio === "function") {
+      window.Wexio(open ? "open" : "close");
+    }
   }
 }
 

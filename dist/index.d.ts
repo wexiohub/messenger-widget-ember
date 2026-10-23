@@ -43,4 +43,13 @@ export declare class WexioWidgetService {
   show(): void;
   hide(): void;
   shutdown(): void;
+  /** Open the panel. */
+  open(): void;
+  /** Close the panel. */
+  close(): void;
+  /** Navigate to a tab (and optionally a help article / news post); opens the panel. */
+  navigate(target: {
+    tab: "home" | "messages" | "help" | "news" | "profile";
+    article?: { kind: "help"; slug: string } | { kind: "news"; id: string };
+  }): void;
 }
