@@ -1,5 +1,21 @@
 # @wexio/messenger-widget-ember
 
+## 1.8.0
+
+### Minor Changes
+
+- c02eefa: The React package is now a thin wrapper that loads the widget from the Wexio CDN, so new widget features reach your
+  site without upgrading the package. The npm package drops from 3.2 MB to about 13 KB of code.
+
+  **Action needed if your site sets a Content-Security-Policy:** allow `https://cdn.wexio.io` in `script-src`. To pin a
+  release or self-host, pass `runtimeUrl` (for example `https://cdn.wexio.io/widget/v1.8.0/widget.js`).
+
+  The props, callbacks and types are unchanged. `setWexioPublicKey` is kept for compatibility and does nothing now: the
+  widget takes the key from `publicKey`.
+
+  The `<wexio-widget>` web component gains the `config`, `configOverride` and `user` properties (they may be set before
+  the element upgrades).
+
 ## 1.7.9
 
 ## 1.7.8
