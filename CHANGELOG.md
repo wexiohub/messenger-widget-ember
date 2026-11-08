@@ -1,5 +1,11 @@
 # @wexio/messenger-widget-ember
 
+## 1.8.1
+
+### Patch Changes
+
+- 184390c: The npm packages no longer include CHANGELOG.md, so they are smaller to install. The changelog is still on GitHub (the package repositories and their Releases pages).
+
 ## 1.8.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@wexio/messenger-widget-ember",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Ember integration for the Wexio web messenger. Service helper around the <wexio-widget> custom element.",
   "license": "MIT",
   "private": false,
@@ -18,8 +18,7 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
