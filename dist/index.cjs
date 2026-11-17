@@ -96,6 +96,15 @@ class WexioWidgetService {
     }
   }
 
+  /**
+   * Host narrowing of the booking services (`booking.services`): only these service ids are offered.
+   * Pass `undefined` to clear it. Sets the element's `bookingServices` property.
+   */
+  setBookingServices(ids) {
+    const el = this.element;
+    if (el) el.bookingServices = ids;
+  }
+
   _setOpen(open) {
     const el = this.element;
     if (el) {

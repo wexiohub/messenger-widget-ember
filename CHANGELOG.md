@@ -1,5 +1,29 @@
 # @wexio/messenger-widget-ember
 
+## 1.9.0
+
+### Minor Changes
+
+- 6785855: A "Reschedule" button in a chat message opens the booking screen for that booking. If the booking is no longer upcoming, the widget opens My bookings instead. Chat quick-reply buttons now stay active only under the latest message.
+- 6785855: Booking now supports several services, specialists and group bookings.
+
+  - **Services.** The "Book a time" block on Home lists the first services with duration and price; a row opens that service's calendar, "All N services" opens the full list.
+  - **Who and how many.** The confirmation, My bookings and the Home card show who the booking is with and the number of people, My bookings gets "Book again", and a reschedule keeps the specialist (or lets the visitor pick another).
+  - **Host narrowing.** New option `booking.services` (React prop `booking={{ services }}`, web-component property `bookingServices` and attribute `booking-services`, script tag `data-booking-services`) keeps only the listed services. It only narrows what the integration allows.
+
+- 6785855: Visitors can now book a time without leaving the widget.
+
+  - **Typed buttons.** Buttons on launcher messages and welcome messages can send a message, open a link, or open booking.
+  - **Booking screen.** The visitor picks a day and a time in their own time zone, fills in one to three details (verified email and phone are prefilled and editable) and gets a calendar invite.
+  - **"Book a time" block on Home**, plus a "Your next booking" card when the visitor has something coming up.
+  - **My bookings** (from Home or Profile): upcoming bookings by month, past bookings, and cancel or reschedule right in the widget.
+  - The features turn on from the integration settings once a calendar is connected. Without one, nothing changes.
+
+### Patch Changes
+
+- 6785855: Home: the featured news block requests the post in the visitor's language, so the server can show its translation.
+- 6785855: Pre-chat form: the submit no longer sends a bot-protection token that the server does not accept. Before this fix, submitting the form failed for integrations with bot protection on.
+
 ## 1.8.3
 
 ## 1.8.2
