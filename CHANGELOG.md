@@ -1,5 +1,12 @@
 # @wexio/messenger-widget-ember
 
+## 1.9.1
+
+### Patch Changes
+
+- d5ac9a5: Script-tag embeds: a visitor's chosen widget language is remembered on the customer's site, so the widget opens in that language at once. Before, the widget started in the browser's language and loaded its settings a second time.
+- d5ac9a5: Home: pinned help articles show their real titles again for visitors in another language. Since the server started answering the visitor's translation of a pinned article, the widget showed "Pinned article 1, 2, ..." instead.
+
 ## 1.9.0
 
 ### Minor Changes
