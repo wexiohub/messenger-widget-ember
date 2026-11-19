@@ -1,5 +1,7 @@
 # @wexio/messenger-widget-ember
 
+## 1.9.2
+
 ## 1.9.1
 
 ### Patch Changes
